@@ -13,5 +13,5 @@ Requirements
 Usage
 -----
 ```bash
-python wiz.py <number of dice to roll> <effective spell level desired> 
+python geo.py <number of dice to roll> <effective spell level desired> 
 ```
