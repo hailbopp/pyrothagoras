@@ -35,29 +35,45 @@ def get_oplist(n):
 
 
 # Recursively generate all possible paren nestings over string p
-def group_parens(p):
+def group_parens(p, is_first_call=False):
     if len(p) == 1:
         yield p
     elif len(p) == 2:
         yield p
     else:
-        yield p
+        # 123456
+        if is_first_call:
+            yield p
 
+        if len(p) % 2 == 0:
+            q = list(group_parens(p[0:len(p)/2]))
+            r = list(group_parens(p[len(p)/2:len(p)]))
+            for group_firsthalf in q:
+                for group_secondhalf in r:
+                    yield "(%s)(%s)" % (group_firsthalf, group_secondhalf)
+
+        # 1(23456)
+        # 1(2(3456))
         q = list(group_parens(p[1:]))
         for group in q:
-            yield p[0] + '(' + group + ')'
+            yield "%s(%s)" % (p[0], group)
 
-        q = list(group_parens(p[1:]))
-        for group in q:
-            yield str(p[0]) + group
+        # 12(3456)
+        # 12(3(4(56)))
+        # 1234(56)
+        if len(p) > 3:
+            q = list(group_parens(p[1:]))
+            for group in q:
+                yield "%s%s" % (p[0], group)
 
         q = list(group_parens(p[:-1]))
         for group in q:
-            yield '(' + group + ')' + p[-1]
+            yield "(%s)%s" % (group, p[-1])
 
-        q = list(group_parens(p[:-1]))
-        for group in q:
-            yield group + str(p[-1])
+        if len(p) > 3:
+            q = list(group_parens(p[:-1]))
+            for group in q:
+                yield "%s%s" % (group, p[-1])
 
 
 def is_prime(a):
@@ -99,7 +115,7 @@ def eval_parengroup(is_prime, ops_combinations, p_group, r_dict, desired):
 
 def eval_permutation(group_parens, i, is_prime, ops_combinations, p, r_dict, desired):
     # for each possible grouping of parentheses
-    groups = list(group_parens(''.join(p)))
+    groups = list(group_parens(''.join(p), is_first_call=True))
     # print i
     i += 1
     for p_group in groups:
@@ -135,7 +151,3 @@ def do_wiz():
 
     #print r_dict
 
-if DEBUG:
-    cProfile.run('do_wiz()')
-else:
-    do_wiz()
